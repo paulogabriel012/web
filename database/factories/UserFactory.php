@@ -57,4 +57,19 @@ class UserFactory extends Factory
             'two_factor_confirmed_at' => now(),
         ]);
     }
+
+    /**
+     * Indicate that the model has an active subscription.
+     */
+    public function subscribed(string $stripeId = 'sub_test', string $stripePrice = 'price_test'): static
+    {
+        return $this->afterCreating(function (User $user) use ($stripeId, $stripePrice): void {
+            $user->subscriptions()->create([
+                'type' => 'default',
+                'stripe_id' => $stripeId,
+                'stripe_status' => 'active',
+                'stripe_price' => $stripePrice,
+            ]);
+        });
+    }
 }

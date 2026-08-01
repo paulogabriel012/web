@@ -59,6 +59,7 @@ class AppServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom([
             database_path('migrations/core'),
             database_path('migrations/users'),
+            database_path('migrations/billing'),
         ]);
     }
 }
