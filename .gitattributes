@@ -1,11 +1,76 @@
+# =============================================================================
+# Browser web — git attributes
+# =============================================================================
+# Normalizes line endings (LF), marks binaries, and defines diff drivers per
+# language for more readable diffs.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Default — auto-detect text, LF
+# -----------------------------------------------------------------------------
 * text=auto eol=lf
 
-*.blade.php diff=html
-*.css diff=css
-*.html diff=html
-*.md diff=markdown
-*.php diff=php
+# -----------------------------------------------------------------------------
+# Diff drivers per language
+# -----------------------------------------------------------------------------
+*.php       text eol=lf diff=php
+*.blade.php text eol=lf diff=html
+*.css       text eol=lf diff=css
+*.scss      text eol=lf diff=css
+*.html      text eol=lf diff=html
+*.md        text eol=lf diff=markdown
 
-CHANGELOG.md export-ignore
-README.md export-ignore
-.github/workflows/browser-tests.yml export-ignore
+# -----------------------------------------------------------------------------
+# Text — no custom diff driver
+# -----------------------------------------------------------------------------
+*.js        text eol=lf
+*.jsx       text eol=lf
+*.ts        text eol=lf
+*.tsx       text eol=lf
+*.mjs       text eol=lf
+*.cjs       text eol=lf
+*.json      text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.toml      text eol=lf
+*.sql       text eol=lf
+*.sh        text eol=lf
+*.txt       text eol=lf
+Makefile    text eol=lf
+Dockerfile  text eol=lf
+
+# -----------------------------------------------------------------------------
+# Binaries — do not normalize
+# -----------------------------------------------------------------------------
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.ico       binary
+*.webp      binary
+*.svg       binary
+*.woff      binary
+*.woff2     binary
+*.ttf       binary
+*.eot       binary
+*.otf       binary
+*.pdf       binary
+*.zip       binary
+*.tar.gz    binary
+*.gz        binary
+
+# -----------------------------------------------------------------------------
+# export-ignore (excluded from `git archive`)
+# -----------------------------------------------------------------------------
+.github/         export-ignore
+.husky/          export-ignore
+.vscode/         export-ignore
+.agents/         export-ignore
+.editorconfig    export-ignore
+.gitattributes   export-ignore
+.gitignore       export-ignore
+.gitleaks.toml   export-ignore
+.prettierrc.js   export-ignore
+.prettierignore  export-ignore
+.npmrc           export-ignore
+CHANGELOG.md     export-ignore

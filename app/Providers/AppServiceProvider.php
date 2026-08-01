@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use Carbon\CarbonImmutable;
@@ -24,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->registerMigrations();
     }
 
     /**
@@ -46,5 +49,16 @@ class AppServiceProvider extends ServiceProvider
                 ->uncompromised()
             : null,
         );
+    }
+
+    /**
+     * Register domain-scoped migration folders.
+     */
+    protected function registerMigrations(): void
+    {
+        $this->loadMigrationsFrom([
+            database_path('migrations/core'),
+            database_path('migrations/users'),
+        ]);
     }
 }

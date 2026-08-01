@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+set -e
+
+echo "→ web · pint --test + types + eslint"
+vendor/bin/pint --test
+pnpm run types
+pnpm run lint:check
+
+echo "✓ pre-push passed"

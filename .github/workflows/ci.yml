@@ -1,0 +1,177 @@
+# =============================================================================
+# CI — active
+# =============================================================================
+# Replaces the Laravel starter `tests.yml` (removed). Runs on push to main and
+# PRs: lint-php, lint-frontend, Pest + Postgres (--min=60), migration round-trip.
+# =============================================================================
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  PHP_VERSION: '8.4'
+  NODE_VERSION: '24'
+  PNPM_VERSION: '11.9.0'
+
+jobs:
+  lint-php:
+    name: Lint PHP
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, pdo_pgsql, pgsql, bcmath, intl, redis, gd
+          coverage: none
+      # package:discover boots the app; without .env APP_ENV defaults to production.
+      - name: Bootstrap env
+        run: cp .env.example .env
+      - run: composer install --no-interaction --prefer-dist --no-progress
+        env:
+          APP_ENV: testing
+      - run: vendor/bin/pint --test
+      - run: vendor/bin/phpstan analyse --memory-limit=1G --no-progress
+
+  lint-frontend:
+    name: Lint frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      # Wayfinder routes/actions are gitignored; generate them before tsc.
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, pdo_pgsql, pgsql, bcmath, intl, redis, gd
+          coverage: none
+      - name: Bootstrap env
+        run: |
+          cp .env.example .env
+          # APP_KEY generated after install when vendor exists
+      - run: composer install --no-interaction --prefer-dist --no-progress
+        env:
+          APP_ENV: testing
+      - name: Generate Wayfinder TypeScript routes
+        run: |
+          php artisan key:generate --no-interaction
+          composer run wayfinder
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run types
+      - run: pnpm run lint:check
+      - run: pnpm run arch:frontend
+      - run: pnpm test
+      - name: Build production assets
+        run: pnpm run build
+
+  test:
+    name: Pest + Postgres
+    runs-on: ubuntu-latest
+    services:
+      pgsql:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: browser
+          POSTGRES_PASSWORD: browser
+          POSTGRES_DB: browser_testing
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U browser"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, pdo_pgsql, pgsql, bcmath, intl, redis, gd
+          coverage: pcov
+      - name: Bootstrap env before composer
+        run: cp .env.example .env
+      - run: composer install --no-interaction --prefer-dist --no-progress
+        env:
+          APP_ENV: testing
+      - name: Bootstrap APP_KEY
+        env:
+          APP_ENV: testing
+        run: php artisan key:generate --no-interaction
+      - name: Run tests
+        env:
+          APP_ENV: testing
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: browser_testing
+          DB_USERNAME: browser
+          DB_PASSWORD: browser
+          CACHE_STORE: array
+          SESSION_DRIVER: array
+          QUEUE_CONNECTION: sync
+          MAIL_MAILER: array
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
+        run: php artisan test --min=60
+
+  migration-round-trip:
+    name: Migration round-trip
+    runs-on: ubuntu-latest
+    services:
+      pgsql:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: browser
+          POSTGRES_PASSWORD: browser
+          POSTGRES_DB: browser_testing
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U browser"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, pdo_pgsql, pgsql, bcmath, intl, redis, gd
+          coverage: none
+      - name: Bootstrap env before composer
+        run: cp .env.example .env
+      - run: composer install --no-interaction --prefer-dist --no-progress
+        env:
+          APP_ENV: testing
+      - name: Bootstrap APP_KEY
+        env:
+          APP_ENV: testing
+        run: php artisan key:generate --no-interaction
+      - name: Migrate, roll back, migrate, and seed
+        env:
+          APP_ENV: testing
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: browser_testing
+          DB_USERNAME: browser
+          DB_PASSWORD: browser
+          CACHE_STORE: array
+          SESSION_DRIVER: array
+          QUEUE_CONNECTION: sync
+          MAIL_MAILER: array
+        run: make migrate-round-trip

@@ -1,18 +1,74 @@
+# =============================================================================
+# Browser web — EditorConfig
+# https://editorconfig.org
+# =============================================================================
+# PHP / Blade                          → 4 spaces (Laravel / Pint)
+# JS / TS / CSS / HTML                 → 2 spaces (matches Prettier tabWidth)
+# JSON / YAML / MD / SQL / Shell       → 2 spaces
+# Makefile                             → tabs (required)
+# =============================================================================
+
 root = true
 
 [*]
 charset = utf-8
 end_of_line = lf
-indent_size = 4
-indent_style = space
 insert_final_newline = true
 trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
 
-[*.md]
-trim_trailing_whitespace = false
+[*.php]
+indent_size = 4
+
+[*.blade.php]
+indent_size = 4
+
+[*.{ts,tsx,js,jsx,mjs,cjs}]
+indent_size = 2
+
+[*.{css,scss,sass,less}]
+indent_size = 2
+
+[*.html]
+indent_size = 2
+
+[*.{json,jsonc}]
+indent_size = 2
 
 [*.{yml,yaml}]
 indent_size = 2
 
-[{compose,docker-compose}.{yml,yaml}]
-indent_size = 4
+[*.toml]
+indent_size = 2
+
+[*.sql]
+indent_size = 2
+
+[docker-compose*.{yml,yaml}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+indent_size = 2
+
+[*.{sh,bash,zsh}]
+indent_size = 2
+end_of_line = lf
+
+[Makefile]
+indent_style = tab
+
+[*.mk]
+indent_style = tab
+
+[.husky/*]
+indent_size = 2
+end_of_line = lf
+
+[.env*]
+insert_final_newline = true
+
+[*.min.*]
+indent_style = ignore
+insert_final_newline = ignore

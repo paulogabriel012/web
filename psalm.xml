@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<psalm
+    errorLevel="7"
+    resolveFromConfigFile="true"
+    findUnusedBaselineEntry="true"
+    findUnusedCode="true"
+    findUnusedPsalmSuppress="true"
+    totallyTyped="false"
+>
+    <projectFiles>
+        <directory name="app" />
+        <directory name="routes" />
+        <directory name="config" />
+        <ignoreFiles>
+            <directory name="vendor" />
+            <directory name="bootstrap/cache" />
+            <directory name="storage" />
+        </ignoreFiles>
+    </projectFiles>
+</psalm>

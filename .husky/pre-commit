@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+set -e
+
+CHANGED=$(git diff --cached --name-only --diff-filter=ACMR)
+
+if echo "$CHANGED" | grep -q '\.php$'; then
+  echo "→ web · pint"
+  vendor/bin/pint --test || {
+    echo "   Run 'vendor/bin/pint' to fix."
+    exit 1
+  }
+fi
+
+pnpm exec lint-staged

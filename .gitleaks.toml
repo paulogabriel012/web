@@ -1,0 +1,41 @@
+# =============================================================================
+# Browser web — Gitleaks config
+# =============================================================================
+# Extends the default ruleset to cover Stripe / Cloudflare tokens
+# and whitelists legitimate patterns in fixtures, factories, and tests.
+# =============================================================================
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "stripe-secret-key"
+description = "Stripe secret or restricted key"
+regex = '''(sk|rk)_(live|test)_[0-9a-zA-Z]{24,}'''
+tags = ["stripe", "secret"]
+
+[[rules]]
+id = "stripe-webhook-secret"
+description = "Stripe webhook signing secret"
+regex = '''whsec_[0-9a-zA-Z]{24,}'''
+tags = ["stripe", "secret"]
+
+[[rules]]
+id = "cloudflare-api-token"
+description = "Cloudflare API token"
+regex = '''(?i)cf[_-]?(api[_-]?)?token['"\s:=]+[A-Za-z0-9_-]{40,}'''
+tags = ["cloudflare", "secret"]
+
+[allowlist]
+description = "Files and paths that never contain real secrets"
+paths = [
+    '''\.env(\..*)?\.example$''',
+    '''\.lock$''',
+    '''node_modules/''',
+    '''vendor/''',
+    '''public/build/''',
+    '''database/factories/''',
+    '''database/seeders/''',
+    '''tests/''',
+    '''storage/''',
+]
