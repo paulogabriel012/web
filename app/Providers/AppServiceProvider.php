@@ -60,6 +60,10 @@ class AppServiceProvider extends ServiceProvider
             database_path('migrations/core'),
             database_path('migrations/users'),
             database_path('migrations/billing'),
+            database_path('migrations/devices'),
+            database_path('migrations/sessions'),
+            database_path('migrations/usage'),
+            database_path('migrations/releases'),
         ]);
     }
 }

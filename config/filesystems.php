@@ -60,6 +60,23 @@ return [
             'report' => false,
         ],
 
+        // Browser installer artifacts. Point RELEASES_DISK at a signed-URL
+        // capable disk (e.g. s3) in production; local is a dev fallback.
+        'releases' => [
+            'driver' => env('RELEASES_DRIVER', 'local'),
+            'root' => storage_path('app/releases'),
+            'url' => env('APP_URL', 'http://localhost').'/storage/releases',
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => true,
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'region' => env('AWS_DEFAULT_REGION'),
+            'bucket' => env('AWS_BUCKET'),
+            'endpoint' => env('AWS_ENDPOINT'),
+            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+        ],
+
     ],
 
     /*
